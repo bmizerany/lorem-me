@@ -1,0 +1,11 @@
+%html
+  %head
+    %title Lorem.me
+    %link{ :href => '/m.css', :rel => 'stylesheet', :type => 'text/css' }
+  %body
+    #container
+      #content
+        #title 
+          Lorem.me
+          %a{ :href => request.path_info + '.raw' } Raw
+        = haml(:sections, :layout => false)

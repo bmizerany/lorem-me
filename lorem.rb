@@ -1,7 +1,9 @@
 require 'rubygems'
 require 'sinatra'
 require 'open-uri'
-require 'nokogiri'
+require 'hpricot'
+require 'time'
+require 'rest_client'
 
 LOREM = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed
 do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
@@ -11,56 +13,49 @@ reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
 pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
 culpa qui officia deserunt mollit anim id est laborum. " unless defined?(LOREM)
 
-class GistPicker
-  def initialize
-    doc = Nokogiri::HTML(open("http://gist.github.com/gists"))
-    @gists = doc.css('#files .file .meta .info span a')
-  end
-
-  def next
-    @gists[rand(@gists.size - 1)]['href']
-  end
-end
-
 helpers do
-  def g(p, c)
-    ((1..p).collect { rand(3) } + Array.new(c, :c)).
-      sort_by { rand }
+
+  def gh
+    @c ||= RestClient::Resource.new("http://gist.github.com")
   end
+
+  def g(p, c)
+    lorems = Array.new(p) {
+      "<div class='lorem'>#{LOREM * (rand(3) + 1)}</div>"
+    }
+    gists = Array.new(c) {
+      doc = Hpricot(gh["/gists"].get)
+      gists = doc / '#files .file .meta .info span a'
+      gist = gists[rand(gists.length - 1)]['href']
+      "<script src='http://gist.github.com#{gist}.js'></script>"
+    }
+    (lorems + gists).sort_by { rand }
+  end
+
+  def one_year_from_now
+    (Time.now + (60 * 60 * 24 * 365) - 1)
+  end
+
+  def expires(date)
+    response['Expires'] = date.httpdate.to_s
+  end
+
 end
 
-get "/:p/:c" do
-  @gists = GistPicker.new
+get('/m.css') { expires one_year_from_now ; sass :m }
+
+get '/' do
+  expires one_year_from_now
+  i = params ; redirect "/#{i[:p].to_i}/#{i[:c].to_i}" if i.has_key?('p')
   haml(:index)
 end
 
-__END__
+get "/:p/:c" do
+  @sections = g(params[:p].to_i, params[:c].to_i)
+  haml(:generator)
+end
 
-@@ index
-
-%html
-  %head
-    %title Lorem.me
-    %style
-      :sass
-        body
-          :font-family Georgia
-        #title
-          :font-size 5em
-        #container
-          :margin 0 auto
-          :width 800px
-        #content
-          :text-align left
-          .lorem
-            :margin-top 1em
-            :margin-bottom 1em
-  %body
-    #container
-      #title Lorem.me
-      #content
-        - for s in g(params[:p].to_i, params[:c].to_i)
-          - if s == :c
-            %script{ :src => "http://gist.github.com#{@gists.next}.js" }
-          - else
-            .lorem= LOREM * s
+get '/:p/:c.raw' do
+  @sections = g(params[:p].to_i, params[:c].to_i)
+  haml(:sections, :layout => false)
+end
