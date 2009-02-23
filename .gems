@@ -1,4 +1,4 @@
 - haml
 - sinatra
 - rest-client
-- rack-cache
+- rdiscount
