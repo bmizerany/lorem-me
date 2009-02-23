@@ -1,0 +1,11 @@
+%html
+  %head
+    %title Lorem.me
+    %link{ :href => '/m.css', :rel => 'stylesheet', :type => 'text/css' }
+  %body
+    #container
+      #content
+        = yield
+        #footer
+          :markdown
+            Created with [Sinatra](http://sinatrarb.com) and hosted on a free plan at [Heroku](http://heroku.com)
