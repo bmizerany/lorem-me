@@ -55,7 +55,8 @@ get "/:p/:c" do
   haml(:generator)
 end
 
-get '/:p/:c.raw' do
+get '/:p/:c/raw' do
+  content_type 'text/plain'
   @sections = g(params[:p].to_i, params[:c].to_i)
   haml(:sections, :layout => false)
 end
