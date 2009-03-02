@@ -20,11 +20,11 @@ helpers do
   end
 
   def g(p, c)
+    doc = Hpricot(gh["/gists"].get)
     lorems = Array.new(p) {
       "<div class='lorem'>#{LOREM * (rand(3) + 1)}</div>"
     }
     gists = Array.new(c) {
-      doc = Hpricot(gh["/gists"].get)
       gists = doc / '#files .file .meta .info span a'
       gist = gists[rand(gists.length - 1)]['href']
       "<script src='http://gist.github.com#{gist}.js'></script>"
