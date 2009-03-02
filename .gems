@@ -1,4 +1,4 @@
-- haml
-- sinatra
-- rest-client
-- rdiscount
+haml
+sinatra
+rest-client
+rdiscount
