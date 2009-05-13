@@ -4,6 +4,7 @@ require 'open-uri'
 require 'hpricot'
 require 'time'
 require 'rest_client'
+require 'haml'
 
 LOREM = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed
 do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
